@@ -374,8 +374,8 @@ void close_the_door (void)
 {	
 	
 	DIO_write('B', MOTOR_EN, HIGH);		//EN = 1
-	DIO_write('B', MOTOR_IN1, HIGH);	//IN1 = 0
-	DIO_write('B', MOTOR_IN2, LOW);		//IN2 = 1
+	DIO_write('B', MOTOR_IN1, LOW);	//IN1 = 0
+	DIO_write('B', MOTOR_IN2, HIGH);		//IN2 = 1
 	DIO_write('B', BUZZER, HIGH);		//Make some noise :D
 	PORTB |= (1 << BUZZER);
 	_delay_ms(2000);
