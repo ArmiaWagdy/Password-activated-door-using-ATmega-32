@@ -31,7 +31,10 @@ First of all, a welcome message will be appeared on LCD and the program waits fo
 Secondly and after pressing any key, a choose list will be appeared on LCD asking you to choose one of two operations:
 
 (1)Enter password.
+
 (2)Change your password.
+
+----------------------------------------------------------------
 
 (1)Entering the password:
 -------------------------
@@ -59,9 +62,7 @@ If you pressed '2' using the keypad, that means you want to change the password,
 
 Notes:
 ------
-The push button switch must be put in somewhere so that if the door is closed, the push button will be pressed.
-
-The push button is connected to external intrrupt 2 (which is PB2 in ATmega32). If the push button is pressed, the door will be closed.
+The push button switch must be put in somewhere so that if the door is closed, the push button will be pressed. The push button is connected to external intrrupt 2 (which is PB2 in ATmega32). If the push button is pressed, the door will be closed.
 ---------------------------------------------------------------
 
 About the attached files:
