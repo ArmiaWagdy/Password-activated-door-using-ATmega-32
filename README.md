@@ -6,16 +6,23 @@ This project allows you to open the door of your home by entering your password.
 Components used in this project:
 --------------------------------
 (1)ATmega 32.
+
 (2)LCD 20*2.
+
 (3)Keypad 4*3.
+
 (4)DC Motor.
+
 (5)Push button switch.
 
 Features of the project:
 -------------------------
 (1)Automatically opening the door using password.
+
 (2)Automatically closing the door (if push button is pressed).
+
 (3)Ability to change the password.
+
 (4)Secure as if you entered the password 9 times wrong, the door 
    will be closed permanently.
 
@@ -63,6 +70,8 @@ If you pressed '2' using the keypad, that means you want to change the password,
 Notes:
 ------
 The push button switch must be put in somewhere so that if the door is closed, the push button will be pressed. The push button is connected to external intrrupt 2 (which is PB2 in ATmega32). If the push button is pressed, the door will be closed.
+
+
 ---------------------------------------------------------------
 
 About the attached files:
