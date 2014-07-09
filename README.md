@@ -50,7 +50,8 @@ If the password is right, the DC Motor will rotate in clock wise direction which
 However, if the password is wrong, the door won't open (and absloutely the DC Motor won't rotate).
 
 Short notes about entering the password:
-----------------------------------------
+_________________________________________
+
 If you entered the password three times wrong, it will block you from re-entering the password for 60 seconds and then makes you able to try again.
 
 If you entered the password three times wrong again, it will block you for 60 seconds again.
