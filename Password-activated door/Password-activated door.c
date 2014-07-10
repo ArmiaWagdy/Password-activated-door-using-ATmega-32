@@ -1,9 +1,9 @@
 /*
- * Password_activated_door.c
- *
- * Created: 7/6/2014 11:25:15 AM
- * Author: Armia Wagdy
- */ 
+* Password_activated_door.c
+*
+* Created: 7/6/2014 11:25:15 AM
+* Author: Armia Wagdy
+*/
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -356,28 +356,7 @@ unsigned char get_password(unsigned char* pass)
 			lcdData('*');
 		}
 	}
-	
-	//do
-	//{
-		//pass[cnt] = get_key();
-		//
-		//if(pass[cnt] == '*')
-		//{
-			//cnt++;
-		//}
-		//else
-		//{
-			////lcdData(pass[cnt++]);
-			//lcdData('*');
-			//cnt++;
-		//}		
-		//if(cnt == PASSWORD_LENGTH)
-		//{
-			//while(get_key() != '*');
-			//pass[cnt++] = '*';
-		//}
-	//} while (pass[cnt-1] != '*');
-	
+
 	lcd_cursor_off();
 	
 	return cnt;
@@ -551,9 +530,6 @@ unsigned char get_puk_code(void)
 		{
 			if(puk_code[i] != eeprom_read(i+27))		//Password is stored in EEPROM from location 27 to 37
 			{
-						lcd_clear();
-						lcd_print(itoa(i,str,10));
-						_delay_ms(1000);
 				return 0;
 			}
 		}
