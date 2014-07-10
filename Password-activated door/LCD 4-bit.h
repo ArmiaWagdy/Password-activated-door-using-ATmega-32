@@ -59,5 +59,7 @@ void lcd_clear(void);
 void lcd_generate(unsigned char location, unsigned char *ptr);
 void lcd_cursor_on(void);
 void lcd_cursor_off(void);
+void lcd_move_cursor_left(void);
+void lcd_move_cursor_right(void);
 
 #endif /* LCD4bit_H_ */

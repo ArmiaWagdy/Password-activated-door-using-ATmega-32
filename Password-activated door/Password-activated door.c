@@ -20,6 +20,7 @@
 
 #define  PASSWORD_LENGTH	 10
 #define  DEBUG				 0
+#define  SETUP				 0
 #define  MOTOR_IN1			 0
 #define  MOTOR_IN2			 1
 #define  SW					 2
@@ -38,10 +39,12 @@ void log_in (void);
 void change_password(void);
 unsigned char get_password(unsigned char* pass);
 unsigned char check_password(unsigned char len, unsigned char* password);
+unsigned char get_puk_code(void);
 unsigned char compare(unsigned char*, unsigned char*, unsigned char, unsigned char);
 void open_the_door (void);
 void close_the_door (void);
 void try_again (void);
+unsigned char is_door_is_permanently_closed(void);
 
 /*************************************************************************************************************/
 
@@ -52,6 +55,25 @@ int main(void)
 	
 	while(1)
 	{
+		//Check firstly if the door is permanently locked or not (if the user enters the password 9 times wrong,
+		//the door will be locked permanently.
+		if(eeprom_read(26) == 0xFF)
+		{			
+			unsigned char chk = 0;
+			do
+			{
+				chk = get_puk_code();
+				
+			} while (!chk);
+			
+		
+			lcd_clear();
+			lcd_print("Successful operation");
+			eeprom_write(26,0);
+			eeprom_write(NUM_OF_TRIALS_ADDR,0);
+			_delay_ms(1000);
+			sign_up();
+		}		
 		//Print Hello message on screen
 		welcome_message();
 		
@@ -72,7 +94,7 @@ int main(void)
 		{
 			change_password();
 			//sign_up();
-		}
+		}			
 	}		
 		
 }
@@ -83,6 +105,7 @@ int main(void)
 
 void init (void)
 {
+	unsigned char i = 0;							//Just a counter
 	lcd_init();										//Initialize LCD
 	adc_init(128,AVCC,RIGHT);						//Initialize ADC
 	DIO_pinmode('B', MOTOR_IN1, OUTPUT);			//PB0 is an output pin
@@ -93,6 +116,14 @@ void init (void)
 	set_externalInterrupt(INT2, FALLING_EDGE);		//Enable INT0, FALLING_EDGE
 	sei();
 	eeprom_write(NUM_OF_TRIALS_ADDR,0);
+	
+#if SETUP
+	eeprom_write(1,4);
+	for(i = 1; i < 5; i++)
+		eeprom_write(i+1, i+48);
+	for(i = 0; i < 10; i++)
+		eeprom_write(i+27, i+48);
+#endif
 }
 
 /*************************************************************************************************************/
@@ -133,7 +164,7 @@ void sign_up (void)
 
 	lcd_clear();
 	lcd_gotoxy(1,1);
-	lcd_print("Your Password: ");
+	lcd_print("Your new Password: ");
 	lcd_gotoxy(1,2);
 	length_1 = get_password(desired_password_1);
 	
@@ -294,30 +325,58 @@ void change_password(void)
 
 unsigned char get_password(unsigned char* pass)
 {
-	unsigned char cnt = 0;
+	int cnt = 0;
+	unsigned char key = 0;
 	
 	lcd_cursor_on();
 	
-	do
+	for(cnt = 0; cnt <= 10 ; )
 	{
-		pass[cnt] = get_key();
+		key = get_key();
 		
-		if(pass[cnt] == '*')
+		if(key == '#')
 		{
-			cnt++;
+			break;
 		}
-		else
+		
+		else if(key == '*' && cnt > 0)
 		{
-			//lcdData(pass[cnt++]);
+			lcd_move_cursor_left();
+			lcdData(' ');
+			lcd_move_cursor_left();
+			cnt --;	
+		}
+		else if(key == '*' && cnt <= 0)
+		{
+			cnt = 0;
+		}
+		else if(cnt != 10)
+		{
+			pass[cnt++] = key;
 			lcdData('*');
-			cnt++;
-		}		
-		if(cnt == PASSWORD_LENGTH)
-		{
-			while(get_key() != '*');
-			pass[cnt++] = '*';
 		}
-	} while (pass[cnt-1] != '*');
+	}
+	
+	//do
+	//{
+		//pass[cnt] = get_key();
+		//
+		//if(pass[cnt] == '*')
+		//{
+			//cnt++;
+		//}
+		//else
+		//{
+			////lcdData(pass[cnt++]);
+			//lcdData('*');
+			//cnt++;
+		//}		
+		//if(cnt == PASSWORD_LENGTH)
+		//{
+			//while(get_key() != '*');
+			//pass[cnt++] = '*';
+		//}
+	//} while (pass[cnt-1] != '*');
 	
 	lcd_cursor_off();
 	
@@ -341,8 +400,11 @@ unsigned char check_password(unsigned char len, unsigned char* password)
 	{
 		for(i = 0; i < len; i++)
 		{
-			if(password[i] != eeprom_read(i+2))		//Password is stored in EEPROM from location 12 to 22
+			if(password[i] != eeprom_read(i+2))		//Password is stored in EEPROM from location 2 to 12
 			{
+				lcd_clear();
+				lcd_print("break");
+				_delay_ms(1000);
 				return 0;
 			}
 		}
@@ -425,11 +487,20 @@ void try_again (void)
 	
 	else if (eeprom_read(NUM_OF_TRIALS_ADDR) >= 9)
 	{
-		lcd_clear();
 		eeprom_write(26,0xFF);
-		lcd_print(" The door is closed ");
-		lcd_print("    permanently");
-		while(1);			//Stay here for ever
+		unsigned char chk = 0;
+		do
+		{
+			chk = get_puk_code();
+			
+		} while (!chk);
+		
+		lcd_clear();
+		lcd_print("Successful operation");
+		eeprom_write(26,0);
+		eeprom_write(NUM_OF_TRIALS_ADDR,0);
+		_delay_ms(1000);
+		sign_up();
 	}
 	
 	else
@@ -446,3 +517,48 @@ void try_again (void)
 
 /*************************************************************************************************************/
 
+//This function checks if the user enters the puk code correctly or not
+
+unsigned char get_puk_code(void)
+{
+	unsigned char i = 0;				//Just a counter variable
+	unsigned char puk_code[10] = {0};
+	unsigned char length = 0;
+	
+	lcd_clear();
+	lcd_print(" The door is closed ");
+	lcd_gotoxy(1,2);
+	lcd_print("    permanently");
+	_delay_ms(1000);
+	
+	lcd_clear();
+	lcd_print("Enter PUK code: ");
+	lcd_gotoxy(1,2);
+	length = get_password(puk_code);
+	for(i = 0; i < 10; i++)
+		puk_code[i] -= 48;
+		
+	if(length != 10)		//PUK code is 10 numbers + the ending '*' which acts as an enter.
+	{
+		lcd_clear();
+		lcd_print(itoa((int)length,str,10));
+		_delay_ms(1000);
+		return 0;
+	}
+	else
+	{
+		for(i = 0; i < 10; i++)
+		{
+			if(puk_code[i] != eeprom_read(i+27))		//Password is stored in EEPROM from location 27 to 37
+			{
+						lcd_clear();
+						lcd_print(itoa(i,str,10));
+						_delay_ms(1000);
+				return 0;
+			}
+		}
+		return 1;
+	}	
+}
+
+/*************************************************************************************************************/

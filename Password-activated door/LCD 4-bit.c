@@ -119,6 +119,20 @@ void lcd_cursor_off(void)
 	delay_us(100);
 }
 //*******************************************************************************
+void lcd_move_cursor_left(void)
+{
+	lcdCommand(LCD_MOVE_CURSOR_LEFT);
+	delay_us(100);
+}
+
+//*******************************************************************************
+void lcd_move_cursor_right(void)
+{
+	lcdCommand(LCD_MOVE_CURSOR_RIGHT);
+	delay_us(100);
+}
+
+//*******************************************************************************
 void lcd_print(char *str)
 {
 	unsigned char i = 0;
